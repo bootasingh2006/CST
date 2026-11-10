@@ -1,0 +1,47 @@
+name: two-subnet-lab
+# Description: Two subnets (192.168.10.0/24 and 192.168.20.0/24) connected via a Linux/FRR router and bridges.
+
+topology:
+  nodes:
+    router:
+      kind: linux
+      image: frrouting/frr:v8.5.0
+      # eth1: 192.168.10.1/24 (Gateway for Subnet A)
+      # eth2: 192.168.20.1/24 (Gateway for Subnet B)
+
+    switch-a:
+      kind: bridge
+    
+    switch-b:
+      kind: bridge
+
+    host-a1:
+      kind: linux
+      image: alpine:latest
+      # IP: 192.168.10.2/24, GW: 192.168.10.1
+
+    host-a2:
+      kind: linux
+      image: alpine:latest
+      # IP: 192.168.10.3/24, GW: 192.168.10.1
+
+    host-b1:
+      kind: linux
+      image: alpine:latest
+      # IP: 192.168.20.2/24, GW: 192.168.20.1
+
+    host-b2:
+      kind: linux
+      image: alpine:latest
+      # IP: 192.168.20.3/24, GW: 192.168.20.1
+
+  links:
+    # Subnet A connections
+    - endpoints: ["host-a1:eth1", "switch-a:eth1"]
+    - endpoints: ["host-a2:eth1", "switch-a:eth2"]
+    - endpoints: ["switch-a:eth3", "router:eth1"]
+
+    # Subnet B connections
+    - endpoints: ["router:eth2", "switch-b:eth3"]
+    - endpoints: ["switch-b:eth1", "host-b1:eth1"]
+    - endpoints: ["switch-b:eth2", "host-b2:eth1"]
